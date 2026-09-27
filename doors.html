@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Двери</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@500&display=swap" rel="stylesheet">
+<script>
+  /* ===== Двери: картинка, подпись при наведении, ссылка на страницу Notion ===== */
+  window.DOORS = [
+    { img: "img/nora.webp",         name: "Лисья нора",         href: "https://www.notion.so/3e6e894fbd4a816ca067cc1cb49b2ea6" },
+    { img: "img/mediateka.webp",    name: "Каминная медиатека", href: "https://www.notion.so/3e7e894fbd4a81fcb5a1e166541f34c0" },
+    { img: "img/igrovye-miry.webp", name: "Игровые миры",       href: "https://www.notion.so/350d726aaea54353993a6c9658497f7b" },
+    { img: "img/cherdak.webp",      name: "Чердак",             href: "https://www.notion.so/3e6e894fbd4a81458344cc9570a01608" }
+  ];
+</script>
+<style>
+  :root{ --bg:#191919; --ink:#ecdfc8; --gold:#e2b26e; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);overflow:hidden;display:flex;align-items:flex-start;justify-content:center;padding:10px 6px 0}
+  .row{width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,3vw,40px);align-items:start}
+  a{position:relative;display:block;text-decoration:none;outline:none;border-radius:999px 999px 10px 10px}
+  .arch{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover;
+    transition:transform .35s cubic-bezier(.2,.7,.2,1), filter .35s ease;
+    filter:brightness(.9) saturate(.95)}
+  .glow{position:absolute;inset:0 0 auto;aspect-ratio:2/3;border-radius:999px 999px 10px 10px;pointer-events:none;
+    box-shadow:0 0 0 0 rgba(226,178,110,0);transition:box-shadow .35s ease, transform .35s cubic-bezier(.2,.7,.2,1)}
+  .name{display:block;text-align:center;margin-top:10px;font-family:"Cormorant SC",Georgia,serif;
+    letter-spacing:.18em;font-size:clamp(11px,1.5vw,15px);color:var(--gold);
+    opacity:0;transform:translateY(-4px);transition:opacity .3s ease, transform .3s ease;white-space:nowrap}
+  a:hover .arch, a:focus-visible .arch{transform:translateY(-4px);filter:brightness(1.05) saturate(1.05)}
+  a:hover .glow, a:focus-visible .glow{transform:translateY(-4px);box-shadow:0 14px 34px -10px rgba(226,178,110,.45)}
+  a:hover .name, a:focus-visible .name{opacity:1;transform:none}
+  a:focus-visible{outline:1px solid var(--gold);outline-offset:6px}
+  @media (hover:none){ .name{opacity:.8;transform:none} }
+  @media (prefers-reduced-motion: reduce){ .arch,.glow,.name{transition:none} }
+</style>
+</head>
+<body>
+<nav class="row" id="row" aria-label="Двери Лисьей обители"></nav>
+<script>
+  const row=document.getElementById('row');
+  (window.DOORS||[]).forEach(d=>{
+    const a=document.createElement('a'); a.href=d.href; a.target='_top'; a.setAttribute('aria-label',d.name); a.title=d.name;
+    a.innerHTML=`<img class="arch" src="${d.img}" alt="" draggable="false"><span class="glow"></span><span class="name">${d.name}</span>`;
+    row.appendChild(a);
+  });
+</script>
+</body>
+</html>
