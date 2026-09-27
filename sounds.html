@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Звуки у камина</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,400&family=Cormorant+SC:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#191919;
+    --card:#1e211d;
+    --card2:#171a16;
+    --ink:#ecdfc8;
+    --muted:#9c907c;
+    --gold:#e2b26e;
+    --gold-soft:rgba(226,178,110,.14);
+    --line:rgba(226,178,110,.30);
+    --track:rgba(236,223,200,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:"Cormorant Garamond",Georgia,serif;
+    display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden}
+  .card{width:100%;max-width:520px;background:linear-gradient(160deg,var(--card),var(--card2));
+    border:1px solid var(--line);border-radius:18px;padding:18px 18px 14px;
+    box-shadow:0 18px 40px -22px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,240,210,.04)}
+  .head{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+  .play{all:unset;cursor:pointer;flex:none;width:52px;height:52px;border-radius:50%;
+    background:var(--gold);color:#1b1610;display:grid;place-items:center;
+    box-shadow:0 0 0 0 rgba(226,178,110,.0);transition:box-shadow .6s, transform .1s}
+  .play:active{transform:scale(.95)}
+  .play:focus-visible{outline:1px solid var(--gold);outline-offset:3px}
+  .on .play{box-shadow:0 0 22px 2px rgba(226,178,110,.35)}
+  .play svg{width:22px;height:22px;fill:currentColor}
+  .ttl{min-width:0}
+  .label{display:flex;align-items:center;gap:8px;font-family:"Cormorant SC",Georgia,serif;
+    letter-spacing:.2em;font-size:13px;color:var(--gold)}
+  .eq{display:inline-flex;gap:2px;align-items:flex-end;height:11px}
+  .eq i{width:2px;background:var(--gold);height:3px;border-radius:1px}
+  .on .eq i{animation:eq 1.2s ease-in-out infinite}
+  .on .eq i:nth-child(2){animation-delay:-.5s}.on .eq i:nth-child(3){animation-delay:-.8s}
+  @keyframes eq{0%,100%{height:3px}50%{height:11px}}
+  .mood{font-size:19px;line-height:1.2;margin-top:2px}
+  .presets{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+  .presets button{all:unset;cursor:pointer;font-size:14px;font-style:italic;color:var(--muted);
+    padding:3px 11px;border:1px solid var(--track);border-radius:999px;transition:all .2s}
+  .presets button:hover{color:var(--ink);border-color:var(--line)}
+  .presets button.act{color:var(--gold);border-color:var(--line);background:var(--gold-soft)}
+  .presets button:focus-visible{outline:1px solid var(--gold);outline-offset:2px}
+  .ch{display:grid;grid-template-columns:28px 1fr;align-items:center;gap:4px 10px;padding:6px 0;
+    border-top:1px solid rgba(236,223,200,.06)}
+  .ch svg{width:20px;height:20px;fill:none;stroke:var(--muted);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;transition:stroke .3s}
+  .ch.live svg{stroke:var(--gold)}
+  .row{display:grid;grid-template-columns:minmax(64px,34%) 1fr;align-items:center;gap:10px}
+  .name{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:3px;border-radius:2px;outline:none;cursor:pointer;
+    background:linear-gradient(to right,var(--gold) 0 var(--v,0%),var(--track) var(--v,0%) 100%)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--ink);border:2px solid var(--gold)}
+  input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;background:var(--ink);border:2px solid var(--gold)}
+  input[type=range]:focus-visible{outline:1px solid var(--gold);outline-offset:4px}
+  .foot{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:var(--muted);font-style:italic}
+  .foot input{max-width:120px}
+  .timer{all:unset;cursor:pointer;margin-left:auto;font-style:italic;color:var(--muted)}
+  .timer:hover{color:var(--gold)}
+  .timer.act{color:var(--gold)}
+  .pop{all:unset;cursor:pointer;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;color:var(--muted)}
+  .pop:hover{color:var(--gold);background:var(--gold-soft)}
+  .pop:focus-visible{outline:1px solid var(--gold);outline-offset:2px}
+  .pop svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .popup .pop{display:none}
+  @media (prefers-reduced-motion: reduce){ .on .eq i{animation:none;height:8px} .play{transition:none} }
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="head">
+    <button class="play" id="play" aria-label="Включить звук"><svg viewBox="0 0 24 24" id="ico"><path d="M8 5v14l11-7z"/></svg></button>
+    <div class="ttl">
+      <div class="label"><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>звуки у камина</div>
+      <div class="mood" id="mood">тишина</div>
+    </div>
+  </div>
+  <div class="presets" id="presets"></div>
+  <div id="chans"></div>
+  <div class="foot">
+    <span>громкость</span><input type="range" id="master" min="0" max="100" value="70" aria-label="Общая громкость">
+    <button class="timer" id="timer" title="Плавно выключить через 30 минут">уснуть через 30 мин</button>
+    <button class="pop" id="pop" title="Открыть в отдельном окошке — там звук не прервётся, даже если листать Notion" aria-label="Открыть в отдельном окне"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8 8M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>
+  </div>
+</div>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const ICONS={
+    fire:'<path d="M12 21c-3.9 0-6.5-2.6-6.5-6.1 0-3.1 2.3-5 3.4-7.6.3 1.7 1.2 2.8 2.3 3.4-.2-3.3 1.4-5.9 3.8-7.7-.2 2.6.9 4.6 2.3 6.3 1.1 1.4 1.7 3 1.7 4.9 0 4.1-2.8 6.8-7 6.8z"/><path d="M12 21c-1.7 0-2.9-1.1-2.9-2.8 0-1.6 1.4-2.6 1.9-4 .9 1.1 2.9 1.6 2.9 4 0 1.7-.6 2.8-1.9 2.8z"/>',
+    rain:'<path d="M7 15a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 17 7.6 3.7 3.7 0 0 1 17.5 15z"/><path d="M8 18l-1 2.5M12 18l-1 2.5M16 18l-1 2.5"/>',
+    wind:'<path d="M3 9h11a3 3 0 1 0-3-3"/><path d="M3 13h15a3 3 0 1 1-3 3"/><path d="M3 17h7"/>',
+    night:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><path d="M16 5.5v2M15 6.5h2"/>',
+    hang:'<ellipse cx="12" cy="13" rx="9" ry="5"/><path d="M3 13c0-4.5 4-8 9-8s9 3.5 9 8"/><circle cx="12" cy="9.5" r="1.8"/>'
+  };
+  const CH=[
+    {id:'fire', name:'камин'},
+    {id:'rain', name:'дождь'},
+    {id:'wind', name:'лес'},
+    {id:'night',name:'сверчки'},
+    {id:'hang', name:'ханг'}
+  ];
+  const PRESETS=[
+    {n:'Уютный вечер', v:{fire:70,rain:35,wind:0,night:0,hang:20}},
+    {n:'Гроза за окном', v:{fire:45,rain:85,wind:40,night:0,hang:0}},
+    {n:'Лесная ночь', v:{fire:0,rain:0,wind:45,night:40,hang:30}},
+    {n:'Только огонь', v:{fire:80,rain:0,wind:0,night:0,hang:0}}
+  ];
+  // --- состояние (запоминается в этом браузере)
+  let state={fire:65,rain:30,wind:0,night:0,hang:20,master:70};
+  try{const s=JSON.parse(localStorage.getItem('fox-den-sounds')||'null'); if(s) state=Object.assign(state,s);}catch(e){}
+  try{ if(location.hash.length>1){ state=Object.assign(state,JSON.parse(decodeURIComponent(location.hash.slice(1)))); } }catch(e){}
+  const POPUP = window.name==='foxden-sounds';
+  let wasPlaying=false; try{ wasPlaying = !POPUP && localStorage.getItem('fox-den-playing')==='1'; }catch(e){}
+  const save=()=>{try{localStorage.setItem('fox-den-sounds',JSON.stringify(state))}catch(e){}};
+  const savePlaying=v=>{ if(POPUP) return; try{localStorage.setItem('fox-den-playing',v?'1':'0')}catch(e){} };
+
+  // --- интерфейс
+  CH.forEach(c=>{
+    const d=document.createElement('div'); d.className='ch'; d.id='ch-'+c.id;
+    d.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[c.id]}</svg>
+      <div class="row"><span class="name">${c.name}</span>
+      <input type="range" min="0" max="100" value="${state[c.id]}" aria-label="${c.name}" data-ch="${c.id}"></div>`;
+    $('chans').appendChild(d);
+  });
+  PRESETS.forEach((p,i)=>{const b=document.createElement('button');b.textContent=p.n;b.dataset.i=i;$('presets').appendChild(b);});
+  const paint=el=>el.style.setProperty('--v',el.value+'%');
+  document.querySelectorAll('input[type=range]').forEach(paint);
+  $('master').value=state.master; paint($('master'));
+
+  function moodText(){
+    const on=CH.filter(c=>state[c.id]>0).map(c=>c.name);
+    if(wasPlaying&&!playing) return 'огонь погас — нажми, чтобы раздуть';
+    if(!ctx||ctx.state!=='running'||!playing) return on.length?'нажми, чтобы зажечь':'тишина';
+    if(!on.length) return 'тишина';
+    const pr=PRESETS.find(p=>CH.every(c=>p.v[c.id]===state[c.id]));
+    return pr? pr.n.toLowerCase() : on.join(' · ');
+  }
+  function refresh(){
+    CH.forEach(c=>$('ch-'+c.id).classList.toggle('live',playing&&state[c.id]>0));
+    $('mood').textContent=moodText();
+    document.querySelectorAll('#presets button').forEach(b=>{
+      const p=PRESETS[b.dataset.i].v; b.classList.toggle('act',CH.every(c=>p[c.id]===state[c.id]));});
+  }
+
+  // --- звук: всё генерируется в браузере, без файлов
+  let ctx=null, master=null, gains={}, playing=false, hangTimer=null, sleepT=null;
+  const SR=()=>ctx.sampleRate;
+
+  function buf(sec,fill){const n=Math.floor(SR()*sec),b=ctx.createBuffer(2,n,SR());
+    for(let ch=0;ch<2;ch++){fill(b.getChannelData(ch),n,ch);} return b;}
+  function loop(b){const s=ctx.createBufferSource();s.buffer=b;s.loop=true;s.start(ctx.currentTime+Math.random()*.1);return s;}
+  const white=(d,n)=>{for(let i=0;i<n;i++)d[i]=Math.random()*2-1;};
+  const brown=(d,n)=>{let l=0;for(let i=0;i<n;i++){l=(l+.02*(Math.random()*2-1))/1.02;d[i]=l*3.5;}};
+  const pink=(d,n)=>{let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;for(let i=0;i<n;i++){const w=Math.random()*2-1;
+    b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.969*b2+w*.153852;b3=.8665*b3+w*.3104856;b4=.55*b4+w*.5329522;b5=-.7616*b5-w*.016898;
+    d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11;b6=w*.115926;}};
+  function filt(type,f,q){const x=ctx.createBiquadFilter();x.type=type;x.frequency.value=f;if(q)x.Q.value=q;return x;}
+  function lfo(rate,depth,param){const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=rate;g.gain.value=depth;o.connect(g).connect(param);o.start();}
+  function chain(...n){for(let i=0;i<n.length-1;i++)n[i].connect(n[i+1]);return n[n.length-1];}
+
+  function build(){
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const comp=ctx.createDynamicsCompressor(); comp.threshold.value=-14; comp.ratio.value=3;
+    master=ctx.createGain(); master.gain.value=0; chain(master,comp,ctx.destination);
+    // общий мягкий зал для ханга и сверчков
+    const rev=ctx.createConvolver(); rev.buffer=buf(3,(d,n)=>{for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);});
+    const revG=ctx.createGain(); revG.gain.value=.35; chain(rev,revG,master);
+    CH.forEach(c=>{gains[c.id]=ctx.createGain();gains[c.id].gain.value=0;gains[c.id].connect(master);});
+
+    // камин: гул + треск
+    const roar=chain(loop(buf(9,brown)),filt('lowpass',320),ctx.createGain()); roar.gain.value=.55; lfo(.23,.18,roar.gain); roar.connect(gains.fire);
+    const crackle=buf(11,(d,n,ch)=>{d.fill(0);let t=0;while(t<n){t+=Math.floor(SR()*(.02+Math.random()*Math.random()*.6));
+      const len=Math.floor(SR()*(.001+Math.random()*.008)),a=Math.pow(Math.random(),2.2)*(Math.random()<.08?1:.45);
+      for(let k=0;k<len&&t+k<n;k++)d[t+k]+=(Math.random()*2-1)*a*Math.exp(-k/(len*.25));}});
+    chain(loop(crackle),filt('highpass',900),filt('peaking',2600,1),gains.fire);
+    const hiss=chain(loop(buf(7,white)),filt('bandpass',5200,.6),ctx.createGain()); hiss.gain.value=.025; hiss.connect(gains.fire);
+
+    // дождь: шелест + капли
+    const rn=chain(loop(buf(10,pink)),filt('highpass',500),filt('lowpass',7200),ctx.createGain()); rn.gain.value=.75; lfo(.05,.12,rn.gain); rn.connect(gains.rain);
+    const drops=buf(8,(d,n)=>{d.fill(0);for(let j=0;j<n*0.0009;j++){const t=Math.floor(Math.random()*n),len=Math.floor(SR()*.004),a=Math.random()*.35;
+      for(let k=0;k<len&&t+k<n;k++)d[t+k]+=(Math.random()*2-1)*a*Math.exp(-k/(len*.3));}});
+    chain(loop(drops),filt('bandpass',3000,.8),gains.rain);
+    const low=chain(loop(buf(9,brown)),filt('lowpass',180),ctx.createGain()); low.gain.value=.35; low.connect(gains.rain);
+
+    // лес и ветер: шум листвы с плавающим фильтром
+    const bp=filt('bandpass',800,.9); lfo(.06,420,bp.frequency);
+    const wg=ctx.createGain(); wg.gain.value=1.3; lfo(.09,.45,wg.gain);
+    chain(loop(buf(12,pink)),bp,wg,gains.wind);
+    const leaves=filt('bandpass',3800,1.4); lfo(.13,900,leaves.frequency);
+    const lg=ctx.createGain(); lg.gain.value=.18; lfo(.21,.14,lg.gain);
+    chain(loop(buf(8,white)),leaves,lg,gains.wind);
+
+    // сверчки: короткие трели
+    const crick=buf(9,(d,n,ch)=>{d.fill(0);const f=ch?4650:4300;let t=Math.floor(SR()*Math.random()*.5);
+      while(t<n){const pulses=3+Math.floor(Math.random()*2);
+        for(let p=0;p<pulses;p++){const st=t+Math.floor(p*SR()*.045),len=Math.floor(SR()*.022);
+          for(let k=0;k<len&&st+k<n;k++){const e=Math.sin(Math.PI*k/len);d[st+k]+=Math.sin(2*Math.PI*f*k/SR())*e*.22;}}
+        t+=Math.floor(SR()*(.55+Math.random()*.7));}});
+    const cg=chain(loop(crick),filt('highpass',3000),ctx.createGain()); cg.gain.value=.5; lfo(.03,.2,cg.gain);
+    cg.connect(gains.night); cg.connect(rev);
+    const nightAir=chain(loop(buf(10,brown)),filt('lowpass',500),ctx.createGain()); nightAir.gain.value=.2; nightAir.connect(gains.night);
+
+    // ханг (D kurd): генеративные ноты
+    gains.hang.connect(rev);
+    // сторож: если браузер или Notion приостановил звук — будим обратно
+    ctx.onstatechange=()=>{ if(playing&&ctx.state!=='running') ctx.resume().catch(()=>{}); };
+    setInterval(()=>{ if(playing&&ctx.state!=='running') ctx.resume().catch(()=>{}); },1000);
+  }
+  const SCALE=[146.83,220,233.08,261.63,293.66,329.63,349.23,392,440,523.25];
+  function hangNote(){
+    if(!playing||state.hang===0){hangTimer=setTimeout(hangNote,1500);return;}
+    const t=ctx.currentTime+.02, f=SCALE[Math.floor(Math.random()*SCALE.length)], vel=.5+Math.random()*.5;
+    [[1,1],[2,.35],[3.01,.12]].forEach(([m,a])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.value=f*m;
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.08*a*vel,t+.006);
+      g.gain.exponentialRampToValueAtTime(.0001,t+(m===1?4.2:2.2)); o.connect(g).connect(gains.hang); o.start(t); o.stop(t+4.5);
+    });
+    if(Math.random()<.25) setTimeout(hangNote,180+Math.random()*220);
+    hangTimer=setTimeout(hangNote,1400+Math.random()*2600);
+  }
+
+  const vol=v=>Math.pow(v/100,1.6);
+  function apply(fade=.6){
+    if(!ctx) return; const t=ctx.currentTime;
+    CH.forEach(c=>{const g=gains[c.id].gain;g.cancelScheduledValues(t);g.setTargetAtTime(vol(state[c.id]),t,fade/3);});
+    const m=master.gain; m.cancelScheduledValues(t); m.setTargetAtTime(playing?vol(state.master)*3.2:0,t,fade/3);
+  }
+
+  const PLAY='<path d="M8 5v14l11-7z"/>', PAUSE='<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>';
+  $('play').onclick=async()=>{
+    if(!ctx){build(); hangNote();}
+    if(ctx.state!=='running') await ctx.resume();
+    playing=!playing; wasPlaying=false; savePlaying(playing); apply(playing?1.5:.8);
+    $('card').classList.toggle('on',playing);
+    $('ico').innerHTML=playing?PAUSE:PLAY;
+    $('play').setAttribute('aria-label',playing?'Выключить звук':'Включить звук');
+    if(!playing){clearTimeout(sleepT);$('timer').classList.remove('act');$('timer').textContent='уснуть через 30 мин';}
+    refresh();
+  };
+  $('chans').addEventListener('input',e=>{const el=e.target;if(!el.dataset.ch)return;state[el.dataset.ch]=+el.value;paint(el);apply(.3);save();refresh();});
+  $('master').oninput=e=>{state.master=+e.target.value;paint(e.target);apply(.3);save();};
+  $('presets').onclick=e=>{const b=e.target.closest('button');if(!b)return;const p=PRESETS[b.dataset.i].v;
+    CH.forEach(c=>{state[c.id]=p[c.id];const el=document.querySelector(`[data-ch="${c.id}"]`);el.value=p[c.id];paint(el);});
+    apply(1.2);save();refresh(); if(!playing)$('play').click();};
+  $('timer').onclick=()=>{
+    const b=$('timer');
+    if(b.classList.contains('act')){clearTimeout(sleepT);b.classList.remove('act');b.textContent='уснуть через 30 мин';return;}
+    if(!playing) return;
+    b.classList.add('act'); b.textContent='усну в '+new Date(Date.now()+30*60000).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    sleepT=setTimeout(()=>{ if(!playing) return; const t=ctx.currentTime; master.gain.setTargetAtTime(0,t,8);
+      setTimeout(()=>{ if(playing) $('play').click(); b.classList.remove('act'); b.textContent='уснуть через 30 мин';},30000); },30*60000);
+  };
+  document.addEventListener('visibilitychange',()=>{ if(ctx&&playing&&ctx.state!=='running') ctx.resume().catch(()=>{}); });
+  addEventListener('pointerdown',()=>{ if(ctx&&playing&&ctx.state!=='running') ctx.resume().catch(()=>{}); });
+  $('pop').onclick=()=>{
+    const url=location.href.split('#')[0]+'#'+encodeURIComponent(JSON.stringify(state));
+    const w=window.open(url,'foxden-sounds','popup,width=440,height=470');
+    if(w){ if(playing) $('play').click(); savePlaying(false); wasPlaying=false; $('mood').textContent='играет в отдельном окошке'; }
+  };
+  if(POPUP){ document.body.classList.add('popup'); document.title='Звуки у камина'; }
+  refresh();
+})();
+</script>
+</body>
+</html>

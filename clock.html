@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Часы у камина</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Cormorant+SC:wght@500&display=swap" rel="stylesheet">
+<script>
+  /* ===== Цитаты: добавляй свои по образцу, a — автор (необязательно) ===== */
+  window.QUOTES = [
+    { t: "Каждый день не может быть хорошим, но есть что-то хорошее в каждом дне." },
+    { t: "Я делаю своё дело, а ты делаешь своё. Ты это ты, а я это я. И если нам посчастливилось найти друг друга, то это прекрасно." },
+    { t: "Осознанность — это не контроль, а наблюдение.", a: "Вадим Зеланд" }
+  ];
+</script>
+<style>
+  :root{
+    --bg:#191919;
+    --ink:#ecdfc8;
+    --muted:#9c907c;
+    --gold:#e2b26e;
+    --line:rgba(226,178,110,.38);
+    --leaf:#0e1c13;
+    --leaf-hi:#1f3a26;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+    overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    padding:14px;
+  }
+  .wrap{
+    width:100%;height:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  }
+  /* Арка: высота подстраивается под доступное место */
+  .arch{
+    position:relative;
+    height:min(62vh, 150vw);
+    aspect-ratio:2/3;
+    border-radius:999px 999px 14px 14px;
+    overflow:hidden;
+    box-shadow:0 0 0 1px var(--line), 0 18px 40px -18px rgba(0,0,0,.8);
+    isolation:isolate;
+  }
+  .arch::after{ /* внутренняя золотая рамка */
+    content:"";position:absolute;inset:7px;border-radius:999px 999px 9px 9px;
+    border:1px solid var(--line);pointer-events:none;z-index:6;
+  }
+  .sky{position:absolute;inset:0;z-index:0;transition:background 2s linear}
+  .stars{position:absolute;inset:0;z-index:1;transition:opacity 2s}
+  .stars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff6e0;opacity:.8;animation:tw 4s ease-in-out infinite}
+  @keyframes tw{50%{opacity:.25}}
+  .orb{position:absolute;z-index:2;border-radius:50%;transition:all 2s}
+  .leaves{position:absolute;inset:0;z-index:3;pointer-events:none}
+  .flies{position:absolute;inset:0;z-index:4;pointer-events:none}
+  .flies b{position:absolute;width:4px;height:4px;border-radius:50%;
+    background:#ffd98a;box-shadow:0 0 8px 3px rgba(255,200,110,.55);
+    animation:drift 9s ease-in-out infinite alternate}
+  @keyframes drift{
+    0%{transform:translate(0,0);opacity:.2}
+    40%{opacity:1}
+    100%{transform:translate(var(--dx),var(--dy));opacity:.35}
+  }
+  .time{
+    position:absolute;z-index:5;left:0;right:0;top:34%;
+    text-align:center;line-height:1;
+    font-weight:500;letter-spacing:.02em;
+    font-size:calc(var(--h) * .19);
+    text-shadow:0 2px 18px rgba(0,0,0,.55);
+    font-variant-numeric:lining-nums tabular-nums;
+  }
+  .time .colon{display:inline-block;transform:translateY(-.06em);animation:blink 2s steps(1) infinite;color:var(--gold)}
+  @keyframes blink{50%{opacity:.6}}
+  .part{
+    position:absolute;z-index:5;left:0;right:0;top:calc(34% + var(--h) * .21);
+    text-align:center;font-family:"Cormorant SC",Georgia,serif;
+    font-size:calc(var(--h) * .052);letter-spacing:.22em;color:rgba(236,223,200,.8);
+    text-shadow:0 1px 8px rgba(0,0,0,.6);
+  }
+  .date{
+    font-family:"Cormorant SC",Georgia,serif;letter-spacing:.16em;
+    font-size:15px;color:var(--gold);text-align:center;
+  }
+  .quote{
+    max-width:34ch;text-align:center;font-style:italic;
+    font-size:16px;line-height:1.35;color:var(--ink);
+    cursor:pointer;transition:opacity .45s ease;
+    user-select:none;
+  }
+  .quote small{display:block;margin-top:4px;font-style:normal;font-size:13px;color:var(--muted);letter-spacing:.06em}
+  .quote.fade{opacity:0}
+  .side{display:flex;flex-direction:column;align-items:center;gap:10px}
+  /* Широкая колонка: арка слева, текст справа */
+  @media (min-aspect-ratio: 5/4){
+    .wrap{flex-direction:row;gap:26px}
+    .arch{height:calc(100vh - 28px)}
+    .side{align-items:flex-start}
+    .side .date,.side .quote{text-align:left}
+  }
+  .rule{width:42px;height:1px;background:var(--line)}
+  @media (prefers-reduced-motion: reduce){
+    .stars i,.flies b,.time .colon{animation:none}
+    .quote{transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="arch" id="arch">
+    <div class="sky" id="sky"></div>
+    <div class="stars" id="stars"></div>
+    <div class="orb" id="orb"></div>
+    <svg class="leaves" viewBox="0 0 200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#27472e"/><stop offset="1" stop-color="#0c1a11"/>
+        </linearGradient>
+        <linearGradient id="lb" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0" stop-color="#08140c"/><stop offset="1" stop-color="#16301f"/>
+        </linearGradient>
+        <linearGradient id="lf" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stop-color="#0d1f13"/><stop offset=".6" stop-color="#23452b"/><stop offset="1" stop-color="#3a6440"/>
+        </linearGradient>
+        <radialGradient id="dew" cx=".35" cy=".35" r=".7">
+          <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+          <stop offset=".45" stop-color="#cfe8d2" stop-opacity=".35"/>
+          <stop offset="1" stop-color="#cfe8d2" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g id="leafLayer"></g>
+    </svg>
+    <div class="flies" id="flies"></div>
+    <div class="time" id="time" aria-live="off"></div>
+    <div class="part" id="part"></div>
+  </div>
+  <div class="side">
+    <div class="date" id="date"></div>
+    <div class="rule"></div>
+    <div class="quote" id="quote" title="Нажми — следующая"></div>
+  </div>
+</div>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const arch = $('arch');
+
+  // --- небо по времени суток: ключевые точки [час, верх, низ, звёзды, светило]
+  const K = [
+    [0,  '#0a141f','#12281f', 1,   'moon'],
+    [5,  '#141c33','#2b3a3a', .8,  'moon'],
+    [6.5,'#3a3a5a','#d7955a', .15, 'sun'],
+    [8.5,'#355a5a','#9fb88a', 0,   'sun'],
+    [16, '#3b5e55','#a9bb85', 0,   'sun'],
+    [18.5,'#3a2c45','#d0773f', .1, 'sun'],
+    [20.5,'#172035','#3b3a36', .6, 'moon'],
+    [24, '#0a141f','#12281f', 1,   'moon']
+  ];
+  const hex = h => [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+  const mix = (a,b,t)=>{const A=hex(a),B=hex(b);return 'rgb('+A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')+')'};
+
+  function paintSky(d){
+    const h = d.getHours() + d.getMinutes()/60;
+    let i=0; while(i<K.length-1 && K[i+1][0] <= h) i++;
+    const a=K[i], b=K[Math.min(i+1,K.length-1)];
+    const t = b[0]===a[0] ? 0 : (h-a[0])/(b[0]-a[0]);
+    const top=mix(a[1],b[1],t), bot=mix(a[2],b[2],t);
+    $('sky').style.background = `radial-gradient(120% 60% at 50% 100%, ${bot} 0%, transparent 70%), linear-gradient(${top}, ${bot})`;
+    const st = a[3] + (b[3]-a[3])*t;
+    $('stars').style.opacity = st;
+    const orb = $('orb'), W = arch.clientWidth;
+    const isMoon = (t<.5 ? a[4] : b[4]) === 'moon';
+    const size = W*0.16;
+    orb.style.width = orb.style.height = size+'px';
+    orb.style.left = (W*0.62)+'px';
+    orb.style.top = (arch.clientHeight*0.13)+'px';
+    orb.style.background = isMoon ? 'radial-gradient(circle at 38% 38%, #fff4d6, #e9d5a4 60%, #c9b27c)' : 'radial-gradient(circle, #ffe6a8, #f3b562 55%, rgba(243,181,98,0) 72%)';
+    orb.style.boxShadow = isMoon ? '0 0 22px 6px rgba(255,236,190,.28)' : '0 0 40px 18px rgba(255,190,110,.25)';
+  }
+
+
+  // листья: [x, y, длина, ширина, угол, слой]  (viewBox 200×300, y=300 — низ арки)
+  function leaves(){
+    const L=[
+      [-10,305,170,30,30,'b'],[210,305,170,30,-30,'b'],[40,315,120,22,12,'b'],[165,318,125,22,-14,'b'],
+      [-18,300,190,44,48,'f'],[218,300,185,44,-50,'f'],[-8,322,150,36,18,'f'],[210,322,150,36,-20,'f'],
+      [-20,262,120,28,78,'f'],[222,268,115,28,-80,'f']
+    ];
+    const NS='http://www.w3.org/2000/svg', g=document.getElementById('leafLayer'); g.innerHTML='';
+    L.forEach(([x,y,l,w,a,layer])=>{
+      const grp=document.createElementNS(NS,'g');
+      grp.setAttribute('transform',`translate(${x} ${y}) rotate(${a})`);
+      const p=document.createElementNS(NS,'path');
+      p.setAttribute('d',`M0 0 C ${w} ${-l*.18}, ${w*.95} ${-l*.72}, 0 ${-l} C ${-w*.95} ${-l*.72}, ${-w} ${-l*.18}, 0 0 Z`);
+      p.setAttribute('fill',layer==='b'?'url(#lb)':'url(#lf)');
+      grp.appendChild(p);
+      if(layer==='f'){
+        const v=document.createElementNS(NS,'path');
+        let d=`M0 0 Q ${w*.08} ${-l*.5} 0 ${-l*.96}`;
+        for(let k=1;k<6;k++){const yy=-l*k/6.5, ww=w*(1-Math.abs(k-2.6)/4.5)*.85;
+          d+=` M0 ${yy} Q ${ww*.5} ${yy-l*.05} ${ww} ${yy-l*.12} M0 ${yy} Q ${-ww*.5} ${yy-l*.05} ${-ww} ${yy-l*.12}`;}
+        v.setAttribute('d',d); v.setAttribute('stroke','#4f7d52'); v.setAttribute('stroke-width','.7');
+        v.setAttribute('fill','none'); v.setAttribute('opacity','.55'); grp.appendChild(v);
+        for(let k=0;k<3;k++){const c=document.createElementNS(NS,'circle');
+          c.setAttribute('cx',(Math.random()*.9-.45)*w); c.setAttribute('cy',-l*(.25+Math.random()*.55));
+          c.setAttribute('r',1.2+Math.random()*1.8); c.setAttribute('fill','url(#dew)'); grp.appendChild(c);}
+      }
+      g.appendChild(grp);
+    });
+  }
+
+  const part = h => h<5?'глубокая ночь':h<11?'утро':h<17?'день':h<22?'вечер':'ночь';
+
+  function tick(){
+    const d = new Date(); 
+    const hh = String(d.getHours()).padStart(2,'0'), mm = String(d.getMinutes()).padStart(2,'0');
+    $('time').innerHTML = `${hh}<span class="colon">:</span>${mm}`;
+    $('part').textContent = part(d.getHours());
+    const ds = d.toLocaleDateString('ru-RU',{weekday:'long', day:'numeric', month:'long'});
+    $('date').textContent = ds;
+    paintSky(d);
+  }
+
+  function sizeVars(){ arch.style.setProperty('--h', arch.clientHeight+'px'); }
+
+  // звёзды и светлячки
+  function seed(){
+    const s=$('stars'); s.innerHTML='';
+    for(let i=0;i<34;i++){const e=document.createElement('i');
+      e.style.left=Math.random()*100+'%'; e.style.top=Math.random()*55+'%';
+      e.style.animationDelay=(Math.random()*4)+'s'; e.style.transform=`scale(${.5+Math.random()})`; s.appendChild(e);}
+    const f=$('flies'); f.innerHTML='';
+    for(let i=0;i<7;i++){const b=document.createElement('b');
+      b.style.left=(10+Math.random()*80)+'%'; b.style.top=(55+Math.random()*35)+'%';
+      b.style.setProperty('--dx',(Math.random()*40-20)+'px'); b.style.setProperty('--dy',(Math.random()*-40)+'px');
+      b.style.animationDelay=(Math.random()*-9)+'s'; b.style.animationDuration=(7+Math.random()*6)+'s'; f.appendChild(b);}
+  }
+
+  // цитата дня: своя на каждый день, по клику — следующая
+  const Q = window.QUOTES || [];
+  const start = new Date(new Date().getFullYear(),0,0);
+  let qi = Math.floor((new Date()-start)/864e5) % Math.max(Q.length,1);
+  function showQuote(){
+    const q=Q[qi]; if(!q) return;
+    $('quote').innerHTML = '«'+q.t+'»' + (q.a?`<small>— ${q.a}</small>`:'');
+  }
+  $('quote').addEventListener('click',()=>{
+    const el=$('quote'); el.classList.add('fade');
+    setTimeout(()=>{ qi=(qi+1)%Q.length; showQuote(); el.classList.remove('fade'); },450);
+  });
+
+  leaves(); seed(); sizeVars(); showQuote(); tick();
+  setInterval(tick, 1000*15);
+  addEventListener('resize',()=>{sizeVars(); tick();});
+})();
+</script>
+</body>
+</html>
